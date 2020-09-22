@@ -6,11 +6,12 @@ import time
 import re
 
 class ProfileSpider(scrapy.Spider):
-    name = "profile_spider"
-    #is it worth making a parent class that just logs into selenium? e.g. class ProfileSpider extends linkedinlogin or something
-    selenium = Selenium()
-    selenium.login()
-    linkedin_urls = ["https://www.linkedin.com/in/garyvaynerchuk/"]
+    def __init__(self):
+        self.name = "profile_spider"
+        #is it worth making a parent class that just logs into selenium? e.g. class ProfileSpider extends linkedinlogin or something
+        self.selenium = Selenium()
+        self.selenium.login()
+        self.linkedin_urls = ['linkedin.com/in/garyvaynerchuk']
     # this is where we should pass args to determine which part of the profile to scrape, but just testing with posts for now
     def get_profile_data(self, url):
         self.selenium.driver.get(url + 'detail/recent-activity/shares')
@@ -24,9 +25,10 @@ class ProfileSpider(scrapy.Spider):
     def start_requests(self):
         yield scrapy.Request(url="http://google.com", callback=self.parse)
 
-    def parse(self, response):
-        contact_info = map(self.get_contact, self.linkedin_urls)
+    def parse_info(self, contact_info):
+        print('contact info: ', contact_info)
         for c in contact_info:
+            print('c:', c)
             sel = Selector(text=c)
             #TODO: figure out pulling multiple attrs, i.e. get email and personal website or something
             print('body tag: ', sel.xpath("//body"))
@@ -35,7 +37,11 @@ class ProfileSpider(scrapy.Spider):
                 yield {
                     "email": email
                 }
-        #working code to get posts from a profile
+
+    def parse(self, response):
+        contact_info = map(self.get_contact, self.linkedin_urls)
+        self.parse_info(contact_info)
+                #working code to get posts from a profile
         #profile_data = map(self.get_profile_data, self.linkedin_urls)
         #for d in profile_data:
         #    sel = Selector(text=d)
@@ -46,10 +52,13 @@ class ProfileSpider(scrapy.Spider):
         #            yield {
         #                "text": output
         #            }
+    #TODO move this and parse_info/refactor so that there's no self conflict when company scraper uses them
     def get_contact(self, url):
+        print('url', url)
         self.selenium.driver.get(url + 'detail/contact-info')
         data = self.selenium.get_page_source()
-        self.selenium.quit()
+        print('data:', data)
+#        self.selenium.quit()
         return data
 
 
