@@ -8,12 +8,11 @@ import os
 load_dotenv(find_dotenv())
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
-
 #Log in with selenium //
 class Selenium():
     def __init__(self):
         chromeOptions = Options()
-        chromeOptions.headless = True
+        #chromeOptions.headless = True
         self.driver = webdriver.Chrome(options=chromeOptions)
 
     def login(self):
