@@ -52,7 +52,6 @@ class ProfileSpider(scrapy.Spider):
         print('getting profile: ', u)
         self.selenium.driver.get(u)
         time.sleep(5)
-        #probably a smarter way to do this (e.g. click_see_more if "see more" link is present)
         self.click_see_more()
         time.sleep(1)
         data = self.selenium.get_page_source()
@@ -96,7 +95,7 @@ class ProfileSpider(scrapy.Spider):
     def get_contact_page(self, url):
         print('url: ', url)
         self.selenium.driver.get(url + 'detail/contact-info')
-        time.sleep(10)
+        time.sleep(1)
         data = self.selenium.get_page_source()
 #        self.selenium.quit()
         return data

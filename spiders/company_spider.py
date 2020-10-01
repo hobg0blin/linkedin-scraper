@@ -22,12 +22,18 @@ class CompanySpider(ProfileSpider):
         # why is map such a nightmare in python
         # is this not pythonic
         # need to research appropriate uses of this
-        people = self.get_people_from_search(pages)
-        for p in people:
-            print('p: ', p)
-            yield {
-                "person": p
-            }
+        people = itertools.chain.from_iterable(self.get_people_from_search(pages))
+        #have to force processing of 'people' generator with a list() function here, otherwise pages after the first iteration aren't actually loaded before we try to process them
+        #at least i think that's what's happening
+        #list() fixed it anyway
+        #FIXME selenium is double-loading pages for some reason
+        contact_pages = [self.get_contact_page(p) for p in list(people)]
+        return self.get_contact(contact_pages)
+#        for p in people:
+#            print('p: ', p)
+#            yield {
+#                "person": p
+#            }
 #        for p in people:
             # GET BIO
         #for p in people:
@@ -62,13 +68,16 @@ class CompanySpider(ProfileSpider):
             self.selenium.driver.execute_script("arguments[0].click()", see_employees)
             time.sleep(10)
             print('current url: ', self.selenium.driver.current_url)
-            while len(pages) < 10:
-                pages.append(self.selenium.get_page_source())
+            pages = 0
+            while pages < 10:
+                time.sleep(3)
+                page = (self.selenium.get_page_source())
                 self.selenium.driver.execute_script("window.scrollTo(0, 10000)")
-                time.sleep(1)
+                time.sleep(3)
                 next_button = self.selenium.driver.find_element_by_xpath('//button[contains(@class, "artdeco-pagination__button--next")]')
                 self.selenium.driver.execute_script("arguments[0].click()", next_button)
                 print('url in while loop: ', self.selenium.driver.current_url)
+                pages += 1
                 yield page
 
     def get_people_from_search(self, pages):
