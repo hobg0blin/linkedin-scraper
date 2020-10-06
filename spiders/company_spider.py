@@ -2,6 +2,7 @@ import scrapy
 import itertools
 from scraper.spiders.selenium_login import Selenium
 from scraper.spiders.profile_spider import ProfileSpider
+from scraper.items import ImageItem
 Selector = scrapy.Selector
 from w3lib.html import remove_tags
 import time
@@ -10,7 +11,7 @@ import re
 class CompanySpider(ProfileSpider):
     name = "company_spider"
 #    selenium = Selenium()
-#    selenium.login()
+#    selenium.login()j
     company_urls = ["https://www.linkedin.com/company/facebook/"]
 
     def start_requests(self):
@@ -23,12 +24,17 @@ class CompanySpider(ProfileSpider):
         # is this not pythonic
         # need to research appropriate uses of this
         people = itertools.chain.from_iterable(self.get_people_from_search(pages))
+        print('people: ', people)
         #have to force processing of 'people' generator with a list() function here, otherwise pages after the first iteration aren't actually loaded before we try to process them
         #at least i think that's what's happening
         #list() fixed it anyway
         #FIXME selenium is double-loading pages for some reason
-        contact_pages = [self.get_contact_page(p) for p in list(people)]
-        return self.get_contact(contact_pages)
+        #contact_pages = [self.get_contact_page(p) for p in list(people)]
+        #return self.get_contact(contact_pages)
+        profiles = self.get_main_profiles(list(people))
+        pictures = self.get_profile_picture(profiles)
+        print('pictures: ', pictures)
+        yield ImageItem(image_urls = pictures)
 #        for p in people:
 #            print('p: ', p)
 #            yield {
@@ -67,26 +73,33 @@ class CompanySpider(ProfileSpider):
             see_employees = self.selenium.driver.find_element_by_xpath('//div[contains(@class, "mt2") and not(contains(@class, "org-top-card-secondary-content__connections"))]//a[contains(@href, "/search/results/people")]')
             self.selenium.driver.execute_script("arguments[0].click()", see_employees)
             time.sleep(10)
-            print('current url: ', self.selenium.driver.current_url)
             pages = 0
-            while pages < 10:
+            while pages < 5:
+                time.sleep(2)
+                i = 100;
+                while i < 3000:
+                    self.selenium.driver.execute_script("window.scrollTo(0,{});".format(i))
+                    # time.sleep(1)
+                    i += 200
                 time.sleep(3)
-                page = (self.selenium.get_page_source())
-                self.selenium.driver.execute_script("window.scrollTo(0, 10000)")
-                time.sleep(3)
+                print('current url: ', self.selenium.driver.current_url)
                 next_button = self.selenium.driver.find_element_by_xpath('//button[contains(@class, "artdeco-pagination__button--next")]')
                 self.selenium.driver.execute_script("arguments[0].click()", next_button)
+
+                page = (self.selenium.get_page_source())
                 print('url in while loop: ', self.selenium.driver.current_url)
                 pages += 1
                 yield page
 
     def get_people_from_search(self, pages):
+        url_count = 0
         for p in pages:
             sel = Selector(text=p)
-    #
-            print('current url: ', self.selenium.driver.current_url)
-            urls = sel.xpath("//div[contains(@class, 'search-result--person')]//a[contains(@class, 'search-result__result-link ')]/@href").getall()
+            urls = sel.xpath("//div[contains(@class, 'search-result--person')]//div[contains(@class, 'search-result__info')]//a[contains(@class, 'search-result__result-link ')]/@href").getall()
             proper_urls = [self.add_linkedin(u) for u in urls]
+            print('proper_urls', proper_urls)
+            url_count += len(proper_urls)
+            print('url count: ', url_count)
             yield proper_urls
 
 

@@ -4,6 +4,7 @@ Selector = scrapy.Selector
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from w3lib.html import remove_tags
+from scraper.items import ImageItem
 import time
 import re
 
@@ -45,7 +46,18 @@ class ProfileSpider(scrapy.Spider):
         #contact_info = map(self.get_contact_page, self.linkedin_urls)
         #return self.get_contact(contact_info)
         profiles = self.get_main_profiles(self.linkedin_urls)
-        return self.get_bios(profiles)
+        #return self.get_bios(profiles)
+        pic_urls = self.get_prof_pic_url(profiles)
+        print('pic urls', pic_urls)
+        yield ImageItem(image_urls=pic_urls)
+
+
+    def get_profile_picture(self, pages):
+        for p in pages:
+            sel = Selector(text=p)
+            image = sel.xpath("//img[contains(@class, 'pv-top-card__photo presence-entity__image')]/@src").get()
+            yield image
+
 
     def get_main_profiles(self, urls):
        for u in urls:
