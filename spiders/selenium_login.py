@@ -12,7 +12,7 @@ PASSWORD = os.getenv("PASSWORD")
 class Selenium():
     def __init__(self):
         chromeOptions = Options()
-        chromeOptions.headless = True
+#        chromeOptions.headless = True
         self.driver = webdriver.Chrome(options=chromeOptions)
 
     def login(self):

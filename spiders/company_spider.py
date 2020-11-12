@@ -33,7 +33,6 @@ class CompanySpider(ProfileSpider):
         #return self.get_contact(contact_pages)
         profiles = self.get_main_profiles(list(people))
         pictures = self.get_profile_picture(profiles)
-        print('pictures: ', pictures)
         yield ImageItem(image_urls = pictures)
 #        for p in people:
 #            print('p: ', p)

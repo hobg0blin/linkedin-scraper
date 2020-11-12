@@ -17,10 +17,10 @@ class ProfileSpider(scrapy.Spider):
         self.selenium.login()
         self.linkedin_urls = ['https://linkedin.com/in/garyvaynerchuk/']
             # this is where we should pass args to determine which part of the profile to scrape, but just testing with posts for now
+    #what was this doing again? recent activity?
     def get_profile_data(self, url):
         self.selenium.driver.get(url + 'detail/recent-activity/shares')
-        self.selenium.driver.execute_script("window.scrollTo(0, 10000)")
-        time.sleep(10)
+        time.sleep(5)
         data = self.selenium.get_page_source()
        # self.selenium.quit()
         return data
@@ -47,9 +47,11 @@ class ProfileSpider(scrapy.Spider):
         #return self.get_contact(contact_info)
         profiles = self.get_main_profiles(self.linkedin_urls)
         #return self.get_bios(profiles)
-        pic_urls = self.get_prof_pic_url(profiles)
-        print('pic urls', pic_urls)
-        yield ImageItem(image_urls=pic_urls)
+        pic_urls = self.get_profile_picture(profiles)
+        #TODO figure out how to point bio info to an image link
+        profile_data = self.get_info(profiles)
+        print(list(profile_data))
+#        yield ImageItem(image_urls=pic_urls)
 
 
     def get_profile_picture(self, pages):
@@ -64,6 +66,15 @@ class ProfileSpider(scrapy.Spider):
         print('getting profile: ', u)
         self.selenium.driver.get(u)
         time.sleep(5)
+        #TODO this should just be a utility function on the selenium class
+        i = 100;
+        while i < 3000:
+            self.selenium.driver.execute_script("window.scrollTo(0,{});".format(i))
+            # time.sleep(1)
+            i += 200
+        time.sleep(5)
+        print('background is present: ', self.selenium.driver.find_element_by_xpath('//div[@id="oc-background-section"]'))
+
         self.click_see_more()
         time.sleep(1)
         data = self.selenium.get_page_source()
@@ -81,14 +92,46 @@ class ProfileSpider(scrapy.Spider):
         self.click_see_more()
 
 
-    def get_bios(self, pages):
+    def get_info(self, pages):
         for p in pages:
             sel = Selector(text=p)
             bio = sel.xpath("//p[contains(@class, 'pv-about__summary-text')]").get()
+            name = sel.xpath("//ul[contains(@class, 'pv-top-card--list')]//li[1]/text()").get()
+            title = sel.xpath("//div[contains(@class, 'ph5')]//h2[contains(@class, 'mt1')]/text()").get()
+            past_jobs = sel.xpath("//div[@id='oc-background-section']//section[contains(@class, 'pv-profile-section')]//section[@id='experience-section']//ul[contains(@class, 'pv-profile-section__section-info')]/li[contains(@class, 'pv-entity__position-group-pager')]").getall()
+            loc = sel.xpath("//ul[contains(@class, 'pv-top-card--list-bullet')]//li/text()").get()
+            history = []
+            for j in past_jobs:
+                sel = Selector(text=j)
+                past_title = sel.xpath("//h3[contains(@class, 't-16')]/text()").getall()
+                past_company = sel.xpath("//p[contains(@class, 'pv-entity__secondary-title')]/text()").getall()
+                dates = sel.xpath("//h4[contains(@class, 'pv-entity__date-range')]//span[2]/text()").getall()
+                loc = sel.xpath("//h4[contains(@class, 'pv-entity__location')]//span[2]/text()").getall()
+                desc = sel.xpath("//p[contains(@class, 'pv-entity__description')]/text()").getall()
+                desc = (' ').join(desc)
+                history.append({
+                    'past_title': past_title,
+                    'past_company': past_company,
+                    'dates': dates,
+                    'location': loc,
+                    'description': desc
+                })
+
             if bio is not None:
                 clean_bio = re.sub('see more$', '', remove_tags(bio))
                 yield {
-                    "bio": clean_bio
+                    "bio": clean_bio,
+                    "name": name,
+                    "title": title,
+                    "loc": loc,
+                    "history": history
+                }
+            else:
+                yield {
+                    "name": name,
+                    "title": title,
+                    "loc": loc,
+                    "history": history
                 }
 
 
