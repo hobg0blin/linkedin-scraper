@@ -65,8 +65,8 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-#    'scrapy.pipelines.images.ImagesPipeline': 1,
-    'linkedinscraper.pipelines.JsonWriterPipeline': 2,
+    'scrapy.pipelines.images.ImagesPipeline': 2,
+    'linkedinscraper.pipelines.JsonWriterPipeline': 1,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

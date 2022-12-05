@@ -9,5 +9,6 @@ import scrapy
 
 
 class ImageItem(scrapy.Item):
+    person = scrapy.Field()
     images = scrapy.Field()
     image_urls = scrapy.Field()

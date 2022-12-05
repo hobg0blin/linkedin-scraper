@@ -2,7 +2,13 @@
 import json
 
 from itemadapter import ItemAdapter
+from datetime import datetime
 
+# datetime object containing current date and time
+now = datetime.now()
+
+# dd/mm/YY H:M:S
+dt_string = now.strftime("%d_%m_%Y_%H_%M")
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -16,7 +22,7 @@ from itemadapter import ItemAdapter
 class JsonWriterPipeline:
 
     def open_spider(self, spider):
-        self.file = open('company.json', 'w')
+        self.file = open(spider.name + dt_string + '.json', 'w')
         self.file.write("'items': { [")
 
     def close_spider(self, spider):
