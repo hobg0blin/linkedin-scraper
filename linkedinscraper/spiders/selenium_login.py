@@ -15,6 +15,7 @@ PASSWORD = os.getenv("PASSWORD")
 class Selenium():
     def __init__(self):
         chromeOptions = Options()
+#        options.add_argument("user-data-dir=C:\\")
 #        chromeOptions.headless = True
         self.driver = webdriver.Chrome("/home/brent/scrapism/linkedinscraper/chromedriver", options=chromeOptions)
 #        self.login()

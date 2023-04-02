@@ -19,14 +19,17 @@ class ProfileSpider(scrapy.Spider):
         #probably should try to understand the 'super' keyword better
         super(ProfileSpider, self).__init__()
         print('cwd: ', os.getcwd())
-        status_file = open('./last_run_stats.json')
-        status = json.load(status_file)
+        # status_file = open('./last_run_stats.json')
+        # status = json.load(status_file)
+        status = {"end_index": 0}
+        ## TODO: create blank status file if none is present
         print('status file: ', status)
         self.completed_urls = status["completed_urls"]
         self.start = status["end_index"]
-        self.end = status["end_index"] + 40
+        self.end = status["end_index"] + 20
         status_file.close()
-        url_file = open('./urls_pgs_10_to_60.json')
+        #GET URLS AND OPEN THEM HERE
+        url_file = open('./google_first_50_pages.json')
         data = json.load(url_file)
         self.linkedin_urls = data['items']['urls']
         print('url count, total: ', len(self.linkedin_urls))
@@ -128,7 +131,7 @@ class ProfileSpider(scrapy.Spider):
         if  (idx % 50 == 0 and idx != 0):
             time.sleep(random.randint(150, 250))
 
-        self.end = self.end + idx + 1
+        #self.end = self.end + 1
         yield data
 
     def click_see_more(self):

@@ -12,14 +12,14 @@ import random
 import time
 import re
 failed_pages = []
-page_start = 10
-page_end = 60
+page_start = 0
+page_end = 50
 
 class CompanySpider(ProfileSpider):
     name = "company"
     selenium = Selenium()
     selenium.login()
-    company_urls = ["https://www.linkedin.com/search/results/all/?keywords=meta&origin=GLOBAL_SEARCH_HEADER&sid=h_-"]
+    company_urls = ["https://www.linkedin.com/search/results/all/?keywords=google&origin=GLOBAL_SEARCH_HEADER&sid=h_-"]
 
     def start_requests(self):
         yield scrapy.Request(url="http://google.com", callback=self.parse)
@@ -30,6 +30,7 @@ class CompanySpider(ProfileSpider):
         # is this not pythonic
         # need to research appropriate uses of this
         people = itertools.chain.from_iterable(self.get_people_from_search(pages))
+#        people = self.get_people_from_search(pages)
         #have to force processing of 'people' generator with a list() function here, otherwise pages after the first iteration aren't actually loaded before we try to process them
         #at least i think that's what's happening
         #list() fixed it anyway
@@ -40,8 +41,7 @@ class CompanySpider(ProfileSpider):
         # NOTE TO SELF NEVER FUCKING CONSUME THE DAMN ITERABLE WHY IS PYTHON LIKE THIS
         # this should just get you a bunch of links, which you can then run the Profile spider on - you can also use the code below to run both in one, but I've been getting locked out when I do this.
         people_list = list(people)
-        yield people_list
-#        print("people: ", people_list)
+        yield { 'items': people_list }
 #        profiles = self.get_main_profiles(people_list)
 #        prof_list = list(profiles)
 #        details = self.get_info(prof_list)
@@ -90,14 +90,15 @@ class CompanySpider(ProfileSpider):
             pages = page_start
             # go to desired page
             if page_start > 0:
-                self.selenium.driver.get('https://www.linkedin.com/search/results/people/?keywords=meta&origin=SWITCH_SEARCH_VERTICAL&page=' + str(page_start) + '&sid=PcB')
+                self.selenium.driver.get('https://www.linkedin.com/search/results/people/?keywords=google&origin=SWITCH_SEARCH_VERTICAL&page=' + str(page_start) + '&sid=PcB')
             time.sleep(5)
             while pages < page_end:
                 print("starting page: ", pages)
-                time.sleep(random.randint(1, 2) * 0.25)
+                time.sleep(random.randint(1, 2))
                 i = 200;
-                while i < 2000:
-                    self.selenium.driver.execute_script("window.scrollTo(0,{});".format(i))
+                while i < 3000:
+                    print('should be scrolling: ', i)
+                    self.selenium.driver.execute_script("window.scrollTo(0, " + str(i) + ");")
                     time.sleep(random.randint(1, 3) * 0.01)
                     i += random.randint(100, 300)
                 wait = WebDriverWait(self.selenium.driver, 3000000000);

@@ -23,7 +23,7 @@ class JsonWriterPipeline:
 
     def open_spider(self, spider):
         self.file = open(spider.name + dt_string + '.json', 'w')
-        self.file.write("'items': { [")
+        self.file.write('{"items": [')
 
     def close_spider(self, spider):
         self.file.write("]}")

@@ -3,3 +3,7 @@
 **/*.json
 **/*.log
 **/*.txt
+**/*.pickle
+**/img/*
+**/*.png
+
