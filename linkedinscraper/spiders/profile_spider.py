@@ -21,13 +21,15 @@ class ProfileSpider(scrapy.Spider):
         print('cwd: ', os.getcwd())
         # status_file = open('./last_run_stats.json')
         # status = json.load(status_file)
-        status = {"end_index": 0}
+        # status = {"end_index": 0}
         ## TODO: create blank status file if none is present
-        print('status file: ', status)
+        #print('status file: ', status)
+        status = {"completed_urls": [], "end_index": 0}
+
         self.completed_urls = status["completed_urls"]
         self.start = status["end_index"]
         self.end = status["end_index"] + 20
-        status_file.close()
+        #status_file.close()
         #GET URLS AND OPEN THEM HERE
         url_file = open('./google_first_50_pages.json')
         data = json.load(url_file)

@@ -15,6 +15,13 @@ PASSWORD = os.getenv("PASSWORD")
 class Selenium():
     def __init__(self):
         chromeOptions = Options()
+
+
+        # chromeOptions.add_argument('headless')
+        # chromeOptions.add_argument('--disable-infobars')
+        # chromeOptions.add_argument('--disable-dev-shm-usage')
+#         chromeOptions.add_argument('--no-sandbox')
+ #       chromeOptions.add_argument('--remote-debugging-port=9222')
 #        options.add_argument("user-data-dir=C:\\")
 #        chromeOptions.headless = True
         self.driver = webdriver.Chrome("/home/brent/scrapism/linkedinscraper/chromedriver", options=chromeOptions)
